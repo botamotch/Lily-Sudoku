@@ -2,7 +2,7 @@
 
 Lily Sudoku
 
-[Github Pages](https://botamotch.github.io/Lily-Sudoku/build/web/)
+[Github Pages](https://botamotch.github.io/Lily-Sudoku/)
 
 ## Getting Started
 
