@@ -55,31 +55,9 @@ class _FrameWidgetState extends State<FrameWidget> {
   }
 
   void _resetNumber() {
-    bool check = true;
-    List inputs = List.generate(9, (_) => [0, 1, 2, 3, 4, 5, 6, 7, 8]);
-
-    // 前半：ランダムに数字を入れていって、列・行・マスにダブりがあればやり直す
-    for (var num in [1, 2, 3, 4]) {
-      do {
-        check = true;
-        correctNumber.asMap().forEach((i, val) {
-          if (val == num) correctNumber[i] = 0;
-        });
-        for (var i = 0; i < 9; i += 1) {
-          inputs[i].shuffle();
-          correctNumber[inputs[i].first + i * 9] = num;
-        }
-        for (var i = 0; i < 9; i += 1) {
-          check = (check & calc.checkRow(correctNumber, num, i));
-          check = (check & calc.checkCol(correctNumber, num, i));
-          check = (check & calc.checkSquare(correctNumber, num, i));
-        }
-      } while (!check);
-      for (var i = 0; i < 9; i += 1) {
-        inputs[i].removeAt(0);
-      }
-    }
-    // 後半：数字を入れていく
+    // 前半でランダムに数字を入れて、後半で探索しながら数字を入れていく
+    calc.setRandomNumber(correctNumber, [1, 2]);
+    calc.setBalnkNumber(correctNumber);
   }
 
   void resetGame() {
@@ -136,8 +114,14 @@ class _FrameWidgetState extends State<FrameWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var blank = 10.0;
     var width = MediaQuery.of(context).size.width;
-    // double height = MediaQuery.of(context).size.height;
+    var height = MediaQuery.of(context).size.height;
+    if (width > height * 9 / 14) {
+      width = height * 9 / 14;
+    } else {
+      width = width - 2 * blank;
+    }
     List<Positioned> _positionList = [];
     // Panel
     for (var i = 0; i < 81; i += 1) {
@@ -147,8 +131,8 @@ class _FrameWidgetState extends State<FrameWidget> {
         status: status[i],
       );
       _positionList.add(Positioned(
-        top: width / 9 * (i ~/ 9),
-        left: width / 9 * (i % 9),
+        top: blank + width / 9 * (i ~/ 9),
+        left: blank + width / 9 * (i % 9),
         width: width / 9,
         height: width / 9,
         child: GestureDetector(
@@ -162,8 +146,8 @@ class _FrameWidgetState extends State<FrameWidget> {
     // Button
     for (var i = 0; i < 9; i += 1) {
       _positionList.add(Positioned(
-        top: width,
-        left: width / 9 * (i % 9),
+        top: blank + width,
+        left: blank + width / 9 * (i % 9),
         width: width / 9,
         height: width / 9,
         child: GestureDetector(
@@ -179,8 +163,8 @@ class _FrameWidgetState extends State<FrameWidget> {
       ));
     }
     _positionList.add(Positioned(
-      top: width * (1 + 1 / 9),
-      left: 0,
+      top: blank + width * (1 + 1 / 9),
+      left: blank,
       width: width,
       height: width / 10,
       child: GestureDetector(

@@ -21,16 +21,17 @@ import 'dart:math';
 //   [6, 15, 24, 33, 42, 51, 60, 69, 78],
 //   [7, 16, 25, 34, 43, 52, 61, 70, 79],
 //   [8, 17, 26, 35, 44, 53, 62, 71, 80]]
-// List _toSquareList(list)
-//   [[0,  1,  2,  9, 10, 11, 18, 19, 20],
-//   [ 3,  4,  5, 12, 13, 14, 21, 22, 23],
-//   [ 6,  7,  8, 15, 16, 17, 24, 25, 26],
-//   [27, 28, 29, 36, 37, 38, 45, 46, 47],
-//   [30, 31, 32, 39, 40, 41, 48, 49, 50],
-//   [33, 34, 35, 42, 43, 44, 51, 52, 53],
-//   [54, 55, 56, 63, 64, 65, 72, 73, 74],
-//   [57, 58, 59, 66, 67, 68, 75, 76, 77],
-//   [60, 61, 62, 69, 70, 71, 78, 79, 80]]
+List squareList = [
+  [0, 1, 2, 9, 10, 11, 18, 19, 20],
+  [3, 4, 5, 12, 13, 14, 21, 22, 23],
+  [6, 7, 8, 15, 16, 17, 24, 25, 26],
+  [27, 28, 29, 36, 37, 38, 45, 46, 47],
+  [30, 31, 32, 39, 40, 41, 48, 49, 50],
+  [33, 34, 35, 42, 43, 44, 51, 52, 53],
+  [54, 55, 56, 63, 64, 65, 72, 73, 74],
+  [57, 58, 59, 66, 67, 68, 75, 76, 77],
+  [60, 61, 62, 69, 70, 71, 78, 79, 80]
+];
 
 List<int> correctNumber = List.generate(81, (_) => 0);
 final List<int> elements = [0, 1, 2, 9, 10, 11, 18, 19, 20];
@@ -67,6 +68,56 @@ bool checkCol(list, n, ncol) {
 bool checkSquare(list, n, nsqu) {
   return toSquareList(list)[nsqu].contains(n);
 }
+
+int getRowNum(n) {
+  return n ~/ 9;
+}
+
+int getColNum(n) {
+  return n % 9;
+}
+
+int getSquareNum(n) {
+  return 0;
+}
+
+List<int> availableNums(list, n) {
+  List<int> nums = List.generate(0, (i) => i + 1);
+  List l = toColList(list)[getColNum(n)] +
+      toRowList(list)[getRowNum(n)] +
+      toSquareList(list)[getSquareNum(n)];
+  for (var i in l) {
+    nums.remove(i);
+  }
+  return nums;
+}
+
+void setRandomNumber(list, nums) {
+  bool check = true;
+  List inputs = List.generate(9, (_) => [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  for (var n in nums) {
+    do {
+      check = true;
+      list.asMap().forEach((i, val) {
+        if (val == n) list[i] = 0;
+      });
+      for (var i = 0; i < 9; i += 1) {
+        inputs[i].shuffle();
+        list[inputs[i].first + i * 9] = n;
+      }
+      for (var i = 0; i < 9; i += 1) {
+        check = (check & checkRow(list, n, i));
+        check = (check & checkCol(list, n, i));
+        check = (check & checkSquare(list, n, i));
+      }
+    } while (!check);
+    for (var i = 0; i < 9; i += 1) {
+      inputs[i].removeAt(0);
+    }
+  }
+}
+
+void setBalnkNumber(list) {}
 
 void printNumber() {
   for (var i = 0; i < 9; i += 1) {

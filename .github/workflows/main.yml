@@ -21,7 +21,9 @@ jobs:
         flutter pub get
 
     - name: Build
-      run: flutter build web
+      run: |
+        flutter build web
+        cp index.html build/web/
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2.8.0
