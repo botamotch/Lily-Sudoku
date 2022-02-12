@@ -4,7 +4,7 @@ Lily Sudoku
 
 ## main branch
 
-通常の開発ブランチ。
+開発ブランチ。
 
 ```
 $ flutter --version
@@ -22,46 +22,8 @@ $ flutter build web
 
 Github Pagesで公開するブランチ。
 
-https://botamotch.github.io/Lily-Sudoku/#/
-
 mainブランチの`./build/web`ディレクトリをコピーしてデプロイ。
-Github Actionsで自動化予定。
-workflowはこんな感じ。
-
-```
-name: github pages
-
-on:
-  push:
-    branches:
-      - master
-
-jobs:
-  build-deploy:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@master
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v1
-      with:
-        channel: 'beta'
-
-    - name: Install
-      run: |
-        flutter config --enable-web
-        flutter pub get
-
-    - name: Build
-      run: flutter build web
-
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v2.8.0
-      env:
-        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: ./build/web
-```
+Github Actionsの自動レシピは`.github/workflows/main.yml`参照。
 
 ## Lily Sudoku本体
 
@@ -72,12 +34,8 @@ CLEARを入力すればなおるからcheckAnswer関数がなんかやらかし�
 
 ゲームの初期化の途中。
 前半の数字１〜４は、各マスにランダムに入れて行・列・四角をチェックしていく方式。
-後半は探索していく（未実装）。
-
-```
-Invalid argument: Maximam call stack size exceeded
-See also: https://flutter.dev/docs/testing/errors
-```
+後半は探索操作の実装中。
+再帰でBacktrackアルゴリズムを使えばよさそうだが苦戦中。
 
 ### class
 - GameAreaWidget

@@ -56,8 +56,8 @@ class _FrameWidgetState extends State<FrameWidget> {
 
   void _resetNumber() {
     // 前半でランダムに数字を入れて、後半で探索しながら数字を入れていく
-    calc.setRandomNumber(correctNumber, [1, 2]);
-    calc.setBalnkNumber(correctNumber);
+    calc.setRandomNumber(correctNumber, [1, 2, 3, 5]);
+    calc.setBlankNumber(correctNumber);
   }
 
   void resetGame() {
