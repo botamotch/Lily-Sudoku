@@ -54,20 +54,18 @@ class _FrameWidgetState extends State<FrameWidget> {
     });
   }
 
-  void _resetNumber() {
-    // 前半でランダムに数字を入れて、後半で探索しながら数字を入れていく
-    calc.setRandomNumber(correctNumber, [1, 2]);
-    calc.setBalnkNumber(correctNumber);
-  }
-
   void resetGame() {
     setState(() {
       for (var i = 0; i < 81; i += 1) {
         inputNumber[i] = 0;
-        // status[i] = i > 40 ? 2 : 0;
-        status[i] = 2;
+        status[i] = i > 1 ? 2 : 0;
       }
-      _resetNumber();
+      do {
+        correctNumber = List.generate(81, (_) => 0);
+        calc.setRandomNumber(correctNumber, [1, 2, 3, 4, 5, 6, 7]);
+        // calc.setRandomNumber(correctNumber, []);
+        calc.setBlankNumber(correctNumber);
+      } while (!calc.checkAnswer(correctNumber));
     });
   }
 
@@ -170,6 +168,7 @@ class _FrameWidgetState extends State<FrameWidget> {
       child: GestureDetector(
         onTap: () {
           setNumber(0);
+          resetGame();
         },
         child: PanelWidget(
           correctNumber: 0,
@@ -227,8 +226,11 @@ class PanelWidget extends StatelessWidget {
     }
     return Container(
       alignment: Alignment(0.0, 0.0),
-      color: color,
       child: Text(number, style: style),
+      decoration: BoxDecoration(
+        color: color,
+        border: Border.all(color: Colors.black),
+      ),
     );
   }
 }
