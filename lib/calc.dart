@@ -124,6 +124,22 @@ List<int> availableNums(list, n) {
 }
 
 void setRandomNumber(list, nums) {
+  if (nums.length == 0) {
+    List tmpList = [];
+    tmpList += [4, 9, 3, 1, 5, 8, 2, 6, 7];
+    tmpList += [2, 5, 6, 3, 9, 7, 1, 8, 4];
+    tmpList += [1, 7, 8, 6, 2, 4, 5, 9, 3];
+    tmpList += [6, 4, 9, 2, 3, 1, 7, 5, 8];
+    tmpList += [7, 2, 1, 9, 8, 5, 3, 4, 6];
+    tmpList += [8, 3, 5, 7, 4, 6, 9, 1, 2];
+    tmpList += [5, 8, 2, 4, 7, 9, 6, 3, 1];
+    tmpList += [3, 1, 4, 5, 6, 2, 8, 7, 9];
+    tmpList += [9, 6, 7, 8, 1, 3, 4, 2, 5];
+    for (var i = 0; i < 81; i += 1) {
+      list[i] = tmpList[i];
+    }
+    return;
+  }
   bool check = true;
   List inputs = List.generate(9, (_) => [0, 1, 2, 3, 4, 5, 6, 7, 8]);
   for (var n in nums) {
@@ -149,74 +165,74 @@ void setRandomNumber(list, nums) {
 }
 
 void setBlankNumber(list) {
-  List tmp_list = List.of(list);
-  List indices = [];
-  List nums = [];
+  List num_table = [];
+  void _getBackTrack(n) {
+    if (n == num_table.length) {
+      return;
+    } else {
+      for (var x in num_table[n]['nums']) {
+        if (!availableNums(list, num_table[n]['index']).contains(x)) {
+          continue;
+        }
+        list[num_table[n]['index']] = x;
+        _getBackTrack(n + 1);
+        if (checkAnswer(list)) {
+          return;
+        }
+      }
+    }
+  }
+
   list.asMap().forEach((i, val) {
     if (val == 0) {
-      indices.add(i);
+      num_table.add({'index': i, 'nums': availableNums(list, i)});
     }
   });
-  for (var i in indices) {
-    nums.add(availableNums(tmp_list, i));
-  }
-
-  // print(indices);
-  // print(nums);
-
-  if (checkAnswer(tmp_list)) {
-    for (var n = 0; n < 81; n += 1) {
-      list[n] = tmp_list[n];
-    }
-    print('### answer found');
-    return;
-  }
-  print('### answer not found');
+  _getBackTrack(0);
 }
 
 void printNumber(list) {
-  print("");
   for (var i = 0; i < 9; i += 1) {
-    print(list.sublist(i * 9, (i + 1) * 9));
+    print("  ${list.sublist(i * 9, (i + 1) * 9)}");
   }
 }
 
 // -----------------------------------------------------------------------------
 
 void main() {
-  List a = [0, 1, 2, 3];
-  List b = [
-    [5, 6, 7],
-    [5, 8],
-    [1, 3, 4]
-  ];
-  for (var i in b[0]) {
-    for (var j in b[1]) {
-      for (var k in b[2]) {
-        print("> $i, $j, $k");
-      }
-    }
-  }
-  print("");
-
-  // List<int> correctNumber = List.generate(81, (_) => 0);
   List<int> correctNumber = [];
-  correctNumber += [4, 9, 3, 1, 0, 8, 2, 6, 0]; //  [4, 9, 3, 1, 5, 8, 2, 6, 7]
-  correctNumber += [2, 5, 6, 3, 0, 7, 1, 8, 0]; //  [2, 5, 6, 3, 9, 7, 1, 8, 4]
-  correctNumber += [1, 7, 8, 6, 0, 4, 5, 9, 0]; //  [1, 7, 8, 6, 2, 4, 5, 9, 3]
-  correctNumber += [6, 4, 9, 2, 0, 1, 7, 5, 0]; //  [6, 4, 9, 2, 3, 1, 7, 5, 8]
-  correctNumber += [7, 2, 1, 9, 0, 5, 3, 4, 0]; //  [7, 2, 1, 9, 8, 5, 3, 4, 6]
-  correctNumber += [8, 3, 5, 7, 0, 6, 9, 1, 0]; //  [8, 3, 5, 7, 4, 6, 9, 1, 2]
-  correctNumber += [5, 8, 2, 4, 0, 9, 6, 3, 0]; //  [5, 8, 2, 4, 7, 9, 6, 3, 1]
-  correctNumber += [3, 1, 4, 5, 0, 2, 8, 7, 0]; //  [3, 1, 4, 5, 6, 2, 8, 7, 9]
-  correctNumber += [9, 6, 7, 8, 0, 3, 4, 2, 0]; //  [9, 6, 7, 8, 1, 3, 4, 2, 5]
-  setBlankNumber(correctNumber);
 
-  // for (var i = 0; i < 1; i += 1) {
-  //   correctNumber = List.generate(81, (_) => 0);
-  //   setRandomNumber(correctNumber, [1, 2, 3]);
-  //   setBlankNumber(correctNumber);
-  // }
-
+  // correctNumber += [4, 9, 3, 1, 0, 8, 2, 6, 0]; //  [4, 9, 3, 1, 5, 8, 2, 6, 7]
+  // correctNumber += [2, 5, 6, 3, 0, 7, 1, 8, 0]; //  [2, 5, 6, 3, 9, 7, 1, 8, 4]
+  // correctNumber += [1, 7, 8, 6, 0, 4, 5, 9, 0]; //  [1, 7, 8, 6, 2, 4, 5, 9, 3]
+  // correctNumber += [6, 4, 9, 2, 0, 1, 7, 5, 0]; //  [6, 4, 9, 2, 3, 1, 7, 5, 8]
+  // correctNumber += [7, 2, 1, 9, 0, 5, 3, 4, 0]; //  [7, 2, 1, 9, 8, 5, 3, 4, 6]
+  // correctNumber += [8, 3, 5, 7, 0, 6, 9, 1, 0]; //  [8, 3, 5, 7, 4, 6, 9, 1, 2]
+  // correctNumber += [5, 8, 2, 4, 0, 9, 6, 3, 0]; //  [5, 8, 2, 4, 7, 9, 6, 3, 1]
+  // correctNumber += [3, 1, 4, 5, 0, 2, 8, 7, 0]; //  [3, 1, 4, 5, 6, 2, 8, 7, 9]
+  // correctNumber += [9, 6, 7, 8, 0, 3, 4, 2, 0]; //  [9, 6, 7, 8, 1, 3, 4, 2, 5]
+  // setBlankNumber(correctNumber);
   // printNumber(correctNumber);
+  // print(checkAnswer(correctNumber));
+
+  DateTime start, end;
+  var average = 0.0;
+  var times = 20.0;
+  for (var i = 0; i < times; i += 1) {
+    start = DateTime.now();
+    do {
+      correctNumber = List.generate(81, (_) => 0);
+      setRandomNumber(correctNumber, [1, 2, 3, 4, 5, 6, 7]);
+      setBlankNumber(correctNumber);
+    } while (!checkAnswer(correctNumber));
+    end = DateTime.now();
+    average += end.difference(start).inMilliseconds;
+    // print("### Start : ${start}");
+    // print("### End   : ${end} (${end.difference(start)})");
+    print(
+        "### Check : ${checkAnswer(correctNumber)} (${end.difference(start).inMilliseconds / 1000})");
+    // printNumber(correctNumber);
+  }
+  average = average / times / 1000;
+  print("### Average Time : ${average}");
 }
