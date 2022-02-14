@@ -234,3 +234,54 @@ class PanelWidget extends StatelessWidget {
     );
   }
 }
+
+class PositionedWidget extends StatelessWidget {
+  const PositionedWidget({
+    Key? key,
+    required this.size,
+    required this.margin,
+    required this.top,
+    required this.left,
+    required this.width,
+    required this.height,
+    required this.onTap,
+    required this.input,
+    required this.correct,
+    required this.text,
+  }) : super(key: key);
+
+  final num size;
+  final double margin;
+  final num top;
+  final num left;
+  final num width;
+  final num height;
+  final void onTap;
+  final num input;
+  final num correct;
+  final String text;
+  static var style = const TextStyle(fontWeight: FontWeight.normal);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: margin + 0,
+      left: margin + 0,
+      width: 0,
+      height: 0,
+      child: GestureDetector(
+        onTap: () {
+          onTap;
+        },
+        child: Container(
+          alignment: Alignment(0.0, 0.0),
+          child: Text("A"),
+          decoration: BoxDecoration(
+            color: Colors.white70,
+            border: Border.all(color: Colors.black),
+          ),
+        ),
+      ),
+    );
+  }
+}
