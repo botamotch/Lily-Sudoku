@@ -10,9 +10,8 @@ class GameAreaWidget extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: const [
           Expanded(child: FrameWidget()),
-          // Expanded(child: MenuWidget()),
         ],
       ),
     );
@@ -30,15 +29,41 @@ class _FrameWidgetState extends State<FrameWidget> {
   List<int> correctNumber = List.generate(81, (_) => 0);
   List<int> status = List.generate(81, (_) => 0);
   List<PanelWidget> panelList = List.generate(
-      81, (_) => PanelWidget(inputNumber: 0, status: 0, correctNumber: 0));
+      81,
+      (_) => const PanelWidget(
+            input: 0,
+            status: 0,
+            correct: 0,
+            text: '',
+            border: '',
+          ));
 
-  void setNumber(var num) {
+  void setNumber(var nums) {
     // 選択中のパネルに数字を入れる
     setState(() {
       for (var i = 0; i < 81; i += 1) {
         if ((status[i] % 2 == 1) & (status[i] ~/ 2 != 1)) {
-          inputNumber[i] = num;
+          inputNumber[i] = nums;
         }
+      }
+      if (calc.checkAnswer(inputNumber)) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              title: const Text("ゲームクリア！"),
+              children: <Widget>[
+                SimpleDialogOption(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    resetGame();
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
       }
     });
   }
@@ -55,129 +80,151 @@ class _FrameWidgetState extends State<FrameWidget> {
   }
 
   void resetGame() {
-    setState(() {
-      for (var i = 0; i < 81; i += 1) {
-        inputNumber[i] = 0;
-        status[i] = i > 1 ? 2 : 0;
-      }
+    void _reset(num blank) {
       do {
         correctNumber = List.generate(81, (_) => 0);
-        calc.setRandomNumber(correctNumber, [1, 2, 3, 4, 5, 6, 7]);
-        // calc.setRandomNumber(correctNumber, []);
+        // calc.setRandomNumber(correctNumber, [1, 2, 3, 4, 5, 6, 7]);
+        calc.setRandomNumber(correctNumber, []);
         calc.setBlankNumber(correctNumber);
       } while (!calc.checkAnswer(correctNumber));
-    });
-  }
-
-  void checkAnswer() {
-    bool check;
-    setState(() {
-      if (inputNumber.contains(0)) {
-        check = false;
-      } else {
-        check = true;
-        for (var i = 0; i < 9; i += 1) {
-          for (var j = 0; j < 9; j += 1) {
-            check = check & calc.checkRow(inputNumber, i, j);
-            check = check & calc.checkCol(inputNumber, i, j);
-            check = check & calc.checkSquare(inputNumber, i, j);
-          }
+      List<int> nums = List.generate(81, (i) => i);
+      nums.shuffle();
+      for (var i = 0; i < 81; i += 1) {
+        if (i >= blank) {
+          status[nums[i]] = 2;
+          inputNumber[nums[i]] = correctNumber[nums[i]];
+        } else {
+          status[nums[i]] = 0;
+          inputNumber[nums[i]] = 0;
         }
+        status[nums[i]] = i >= blank ? 2 : 0;
       }
-      if (check) {
-        // showDialog(
-        //   context: context,
-        //   builder: (context) {
-        //     return SimpleDialog(
-        //       title: Text("ゲームクリア！"),
-        //       children: <Widget>[
-        //         SimpleDialogOption(
-        //           onPressed: () => ({}),
-        //           child: Text("OK"),
-        //         ),
-        //       ],
-        //     );
-        //   },
-        // );
-        resetGame();
-      }
+    }
+
+    setState(() {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            title: const Text("ゲームスタート"),
+            children: <Widget>[
+              SimpleDialogOption(
+                onPressed: () {
+                  _reset(10);
+                  Navigator.pop(context);
+                },
+                child: const Text("かんたん"),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  _reset(30);
+                  Navigator.pop(context);
+                },
+                child: const Text("ふつう"),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  _reset(50);
+                  Navigator.pop(context);
+                },
+                child: const Text("むずかしい"),
+              ),
+            ],
+          );
+        },
+      );
     });
   }
 
   @override
   void initState() {
     super.initState();
-    resetGame();
+    // resetGame();
   }
 
   @override
   Widget build(BuildContext context) {
-    var blank = 10.0;
+    var margin = 10.0;
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
+    String border = '';
     if (width > height * 9 / 14) {
       width = height * 9 / 14;
     } else {
-      width = width - 2 * blank;
+      width = width - 2 * margin;
     }
     List<Positioned> _positionList = [];
     // Panel
     for (var i = 0; i < 81; i += 1) {
+      border = '';
+      border += (i ~/ 9 == 0) ? 't' : '';
+      border += (i ~/ 9 == 8) ? 'b' : '';
+      border += (i % 9 == 0) ? 'l' : '';
+      border += (i % 9 == 8) ? 'r' : '';
       panelList[i] = PanelWidget(
-        inputNumber: inputNumber[i],
-        correctNumber: correctNumber[i],
+        input: inputNumber[i],
+        correct: correctNumber[i],
         status: status[i],
+        text: '',
+        border: border,
       );
       _positionList.add(Positioned(
-        top: blank + width / 9 * (i ~/ 9),
-        left: blank + width / 9 * (i % 9),
+        top: margin + width / 9 * (i ~/ 9),
+        left: margin + width / 9 * (i % 9),
         width: width / 9,
         height: width / 9,
         child: GestureDetector(
-          onTap: () {
-            selectPanel(i);
-          },
+          onTap: () => selectPanel(i),
           child: panelList[i],
         ),
       ));
     }
+
     // Button
     for (var i = 0; i < 9; i += 1) {
+      border = '';
+      // border += (i ~/ 9 == 0) ? 't' : '';
+      // border += (i ~/ 9 == 8) ? 'b' : '';
+      border += (i % 9 == 0) ? 'l' : '';
+      border += (i % 9 == 8) ? 'r' : '';
       _positionList.add(Positioned(
-        top: blank + width,
-        left: blank + width / 9 * (i % 9),
+        top: margin + width,
+        left: margin + width / 9 * (i % 9),
         width: width / 9,
         height: width / 9,
         child: GestureDetector(
-          onTap: () {
-            setNumber(i + 1);
-          },
+          onTap: () => setNumber(i + 1),
           child: PanelWidget(
-            correctNumber: 0,
-            inputNumber: (i + 1),
-            status: 4,
-          ),
+              correct: 0,
+              input: 0,
+              status: 4,
+              text: '${(i + 1)}',
+              border: border),
         ),
       ));
     }
     _positionList.add(Positioned(
-      top: blank + width * (1 + 1 / 9),
-      left: blank,
+      top: margin + width * (1 + 1 / 9),
+      left: margin,
       width: width,
-      height: width / 10,
+      height: width / 9,
       child: GestureDetector(
-        onTap: () {
-          setNumber(0);
-          resetGame();
-        },
-        child: PanelWidget(
-          correctNumber: 0,
-          inputNumber: 0,
-          status: 4,
-        ),
+        onTap: () => setNumber(0),
+        child: const PanelWidget(
+            correct: 0, input: 0, status: 4, text: 'Clear', border: 'blr'),
       ),
     ));
-    // ここにリセットボタン等を追加する
+    _positionList.add(Positioned(
+      top: margin + width * (1 + 3 / 9),
+      left: margin,
+      width: width,
+      height: width / 9,
+      child: GestureDetector(
+        onTap: () => resetGame(),
+        child: const PanelWidget(
+            correct: 0, input: 0, status: 4, text: 'ゲームスタート', border: 'tblr'),
+      ),
+    ));
 
     return Stack(
       fit: StackFit.expand,
@@ -187,98 +234,66 @@ class _FrameWidgetState extends State<FrameWidget> {
 }
 
 class PanelWidget extends StatelessWidget {
-  const PanelWidget(
-      {Key? key,
-      required this.inputNumber,
-      required this.status,
-      required this.correctNumber})
-      : super(key: key);
+  const PanelWidget({
+    Key? key,
+    required this.input,
+    required this.status,
+    required this.correct,
+    required this.text,
+    required this.border,
+  }) : super(key: key);
 
-  final int inputNumber;
-  final int correctNumber;
+  final int input;
+  final int correct;
   final int status;
+  final String text;
+  final String border;
 
   @override
   Widget build(BuildContext context) {
     Color color;
-    String number;
+    String content;
     var style;
+    // 0：入力可能、未選択／1：入力可能、選択中／2,3：入力不可／その他：Button
     if (status == 0) {
-      // 入力可能、未選択
       color = Colors.white70;
-      number = (inputNumber != 0) ? '$inputNumber' : '';
-      style = TextStyle(fontWeight: FontWeight.normal);
+      content = (input != 0) ? '$input' : '';
+      style = const TextStyle(fontWeight: FontWeight.normal);
     } else if (status == 1) {
-      // 入力可能、選択中
       color = Colors.black12;
-      number = (inputNumber != 0) ? '$inputNumber' : '';
-      style = TextStyle(fontWeight: FontWeight.normal);
+      content = (input != 0) ? '$input' : '';
+      style = const TextStyle(fontWeight: FontWeight.normal);
     } else if ((status & 2) == 2) {
-      // 入力不可
       color = Colors.white12;
-      number = (correctNumber != 0) ? '$correctNumber' : '';
-      style = TextStyle(fontWeight: FontWeight.bold);
+      content = (correct != 0) ? '$correct' : '';
+      style = const TextStyle(fontWeight: FontWeight.bold);
     } else {
-      // Buttonパネル
       color = Colors.black12;
-      number = (inputNumber != 0) ? '$inputNumber' : 'CLEAR';
-      style = TextStyle(fontWeight: FontWeight.bold);
+      content = text;
+      style = const TextStyle(fontWeight: FontWeight.bold);
     }
     return Container(
-      alignment: Alignment(0.0, 0.0),
-      child: Text(number, style: style),
+      alignment: const Alignment(0.0, 0.0),
+      child: Text(content, style: style),
       decoration: BoxDecoration(
         color: color,
-        border: Border.all(color: Colors.black),
-      ),
-    );
-  }
-}
-
-class PositionedWidget extends StatelessWidget {
-  const PositionedWidget({
-    Key? key,
-    required this.size,
-    required this.margin,
-    required this.top,
-    required this.left,
-    required this.width,
-    required this.height,
-    required this.onTap,
-    required this.input,
-    required this.correct,
-    required this.text,
-  }) : super(key: key);
-
-  final num size;
-  final double margin;
-  final num top;
-  final num left;
-  final num width;
-  final num height;
-  final void onTap;
-  final num input;
-  final num correct;
-  final String text;
-  static var style = const TextStyle(fontWeight: FontWeight.normal);
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: margin + 0,
-      left: margin + 0,
-      width: 0,
-      height: 0,
-      child: GestureDetector(
-        onTap: () {
-          onTap;
-        },
-        child: Container(
-          alignment: Alignment(0.0, 0.0),
-          child: Text("A"),
-          decoration: BoxDecoration(
-            color: Colors.white70,
-            border: Border.all(color: Colors.black),
+        // border: Border.all(color: Colors.black),
+        border: Border(
+          top: BorderSide(
+            color: (border.contains('t') ? Colors.black87 : Colors.black87),
+            width: (border.contains('t') ? 2.0 : 0.5),
+          ),
+          bottom: BorderSide(
+            color: (border.contains('t') ? Colors.black87 : Colors.black87),
+            width: (border.contains('b') ? 2.0 : 0.5),
+          ),
+          left: BorderSide(
+            color: (border.contains('t') ? Colors.black87 : Colors.black87),
+            width: (border.contains('l') ? 2.0 : 0.5),
+          ),
+          right: BorderSide(
+            color: (border.contains('t') ? Colors.black87 : Colors.black87),
+            width: (border.contains('r') ? 2.0 : 0.5),
           ),
         ),
       ),
